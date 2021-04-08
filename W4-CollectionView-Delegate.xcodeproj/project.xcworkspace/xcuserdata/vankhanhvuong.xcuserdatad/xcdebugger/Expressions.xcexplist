@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "DetailsViewController.show(index:):DetailsViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.fruitArr">
+            </PersistentString>
+            <PersistentString
+               value = "self.tepmFruitArr">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ViewController.collectionView(_:numberOfItemsInSection:):ViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "data">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ViewController.reloadDataFruitList():ViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "fruitArray[j].quality">
+            </PersistentString>
+            <PersistentString
+               value = "data[i].quality">
+            </PersistentString>
+            <PersistentString
+               value = "fruitArray[j].name">
+            </PersistentString>
+            <PersistentString
+               value = "data[i].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
