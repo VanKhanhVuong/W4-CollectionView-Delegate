@@ -7,7 +7,7 @@
 
 import UIKit
 protocol DetailsViewControllerDelegate: AnyObject {
-    func getValueFruitArray(array: Array<Fruit>, index: IndexPath)
+    func getValueFruitArray(array: [Fruit], backViewHome: Bool, cartCount: Int)
 }
 
 class DetailsViewController: UIViewController {
@@ -15,21 +15,24 @@ class DetailsViewController: UIViewController {
     @IBOutlet weak var totalBillView: UIView!
     @IBOutlet weak var totalBillLabel: UILabel!
     @IBOutlet weak var buyButton: UIButton!
-    var fruitArr: Array<Fruit> = Array()
+    var data: [Fruit] = []
+    var listDisplayArray: [Fruit] = []
     let identifier = "MyTableViewCell"
-    var checkRemoveItems: Bool = false
-    var index = IndexPath(item: 0, section: 0)
+    var sumCartCount: Int = 0
+    
+    var indexPath = IndexPath(item: 0, section: 0)
     weak var delegate: DetailsViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         fruitListTableView.delegate = self
         fruitListTableView.dataSource = self
-        buyButton.customButtonCornerRadius(buttonName: "")
+        //buyButton.customButtonCornerRadius(buttonName: "")
         buyButton.effectButton()
         let nib = UINib(nibName: identifier, bundle: nil)
         fruitListTableView.register(nib, forCellReuseIdentifier: identifier)
         setupNavigationBarItems()
+        setupData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,47 +40,45 @@ class DetailsViewController: UIViewController {
         showTotalBill()
     }
     
+     //Filter ra những qua
+    func setupData() {
+        self.listDisplayArray = self.data
+    }
+    
     func setupNavigationBarItems() {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Back", style: .plain, target: self, action: #selector(backAction))
     }
     @objc func backAction() {
-        delegate?.getValueFruitArray(array: self.fruitArr, index: self.index)
+        delegate?.getValueFruitArray(array: self.listDisplayArray, backViewHome: true, cartCount: self.sumCartCount)
         self.navigationController?.popToRootViewController(animated: true)
     }
     
     func showTotalBill() {
         var billArray: [Double] = []
-        for i in 0..<self.fruitArr.count {
-            billArray.append(Double(fruitArr[i].price * Float(fruitArr[i].amount)))
+        for i in 0..<self.listDisplayArray.count {
+            billArray.append(Double(listDisplayArray[i].price * Float(listDisplayArray[i].amount)))
         }
         let total = billArray.reduce(0.0, +)
         self.totalBillLabel.text = "$ \(total)"
     }
-    
-    func reloadData() -> Array<Fruit>{
-        var fruitListArr: Array<Fruit> = []
-        fruitListArr = self.fruitArr
-        for i in 0..<self.fruitArr.count {
-            if (fruitArr[i].isShow == false) {
-                fruitListArr.remove(at: i)
+    func test(index: IndexPath) {
+        var listGioHang: [Fruit] = []
+        for i in 0..<self.listDisplayArray.count {
+            if self.listDisplayArray[i].amount > 0 {
+                listGioHang.append(self.listDisplayArray[i])
             }
         }
-        return fruitListArr
+        self.sumCartCount = listGioHang.count
+        // Hien thi Label trên trong gio hang XXX
+        //self.cartButton.setTitle("\(listGioHang.count)", for: .normal)
     }
-    
-    func checkRemoveItem() {
-        if self.checkRemoveItems == true {
-            self.fruitArr = reloadData()
-        }
-    }
-    
+
     func displaysWarningMessages(index: IndexPath, nameFruit: String) {
-        self.index = index
            let defaultAction = UIAlertAction(title: "Agree",
-                                style: .default) { (action) in
-            self.fruitArr[index.row].isShow = false
-            self.fruitArr[index.row].amount = 0
-            self.fruitArr.remove(at: index.row)
+                                             style: .default) { [self] (action) in
+            self.listDisplayArray[index.row].amount = 0
+            test(index: index)
+            showTotalBill()
             self.fruitListTableView.reloadData()
            }
            let cancelAction = UIAlertAction(title: "Disagree",
@@ -90,8 +91,6 @@ class DetailsViewController: UIViewController {
            alert.addAction(defaultAction)
            alert.addAction(cancelAction)
            self.present(alert, animated: true)
-       
-        
     }
 }
 
@@ -99,60 +98,55 @@ extension DetailsViewController: UITableViewDelegate {
 }
 extension DetailsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        checkRemoveItem()
-        return self.fruitArr.count
+        return self.listDisplayArray.count
+    }
+    
+    // Ẩn bớt những trái có amount = 0
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        if listDisplayArray[indexPath.row].amount == 0 {
+            return 0
+        }
+        return tableView.rowHeight
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath) as! MyTableViewCell
-        checkRemoveItem()
-        cell.fruitImageLabel.text = fruitArr[indexPath.row].image
-        cell.nameFruitLabel.text = fruitArr[indexPath.row].name
-        cell.nameFruitLabel.textColor = fruitArr[indexPath.row].backgrourd
-        cell.descriptionLabel.text = fruitArr[indexPath.row].description
-        cell.priceLabel.text = "\(fruitArr[indexPath.row].price)"
-        cell.amountLabel.text = "\(fruitArr[indexPath.row].amount)"
-        cell.cellLabelView.backgroundColor = fruitArr[indexPath.row].backgrourd
+        cell.fruitImageLabel.text = listDisplayArray[indexPath.row].image
+        cell.nameFruitLabel.text = listDisplayArray[indexPath.row].name
+        cell.nameFruitLabel.textColor = listDisplayArray[indexPath.row].backgrourd
+        cell.descriptionLabel.text = listDisplayArray[indexPath.row].description
+        cell.priceLabel.text = "\(listDisplayArray[indexPath.row].price)"
+        cell.amountLabel.text = "\(listDisplayArray[indexPath.row].amount)"
+        cell.cellLabelView.backgroundColor = listDisplayArray[indexPath.row].backgrourd
         cell.delegate = self
         return cell
     }
 }
 extension DetailsViewController: MyTableViewCellDelegate {
     func plusOrMinusButton(cell: MyTableViewCell, calculation: Bool) {
-        guard var amount = Int(cell.amountLabel.text!) else { return }
-        guard let indexPathFruit: IndexPath = fruitListTableView.indexPath(for: cell) else { return }
-        guard let fruitName: String = cell.nameFruitLabel.text else { return }
-        if (calculation == true) {
-            amount = amount + 1
-            cell.downButton.isHidden = false
-        } else {
-            if amount == 0 {
-                amount = 0
-                displaysWarningMessages(index: indexPathFruit, nameFruit: fruitName)
-                cell.downButton.isHidden = true
-            } else {
-                amount = amount - 1
+        guard let indexPath: IndexPath = fruitListTableView.indexPath(for: cell) else { return }
+        // Lấy thuộc tính model.amount
+        guard let amountModel: Int = Int(cell.amountLabel.text!) else { return }
+        if calculation == true {
+            if self.listDisplayArray[indexPath.item].amount != amountModel {
+                self.listDisplayArray[indexPath.item].amount = amountModel
+                showTotalBill()
             }
-            cell.downButton.isHidden = false
-        }
-        cell.amountLabel.text = "\(amount)"
-        for i in 0..<fruitArr.count {
-            if fruitArr[i].image == cell.fruitImageLabel.text{
-                if (Int(fruitArr[i].amount) < amount) {
-                    fruitArr[i].amount += 1
+        } else {
+            if amountModel == 1 {
+                // Khi amount đã = 1 mà ta bấm (-) nữa nên hiện message
+                displaysWarningMessages(index: indexPath, nameFruit: self.listDisplayArray[indexPath.item].name)
+            } else {
+                if self.listDisplayArray[indexPath.item].amount != amountModel - 1{
+                    self.listDisplayArray[indexPath.item].amount = amountModel - 1
                     showTotalBill()
-                    return
-                } else if (Int(fruitArr[i].amount) == amount) {
-                    showTotalBill()
-                    return
-                } else {
-                    fruitArr[i].amount -= 1
-                    self.checkRemoveItems = true
-                    showTotalBill()
-                    return
                 }
             }
         }
     }
 }
-
+extension DetailsViewController: ViewControllerDelegate {
+    func pushValueFruitArray(array: [Fruit]) {
+        print(array)
+    }
+}

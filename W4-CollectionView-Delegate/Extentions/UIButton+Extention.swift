@@ -7,6 +7,13 @@
 
 import UIKit
 
+enum CORNER {
+    case topLeftbottomLeft
+    case topRightBottomRight
+    case topLeft
+    case topRight
+}
+
 extension UIButton {
     func effectButton() {
         self.backgroundColor = UIColor(red: 171/255, green: 178/255, blue: 186/255, alpha: 1.0)
@@ -18,44 +25,33 @@ extension UIButton {
         self.layer.cornerRadius = 4.0
     }
 
-    func customButtonCornerRadius(buttonName: String){
+    func coradiusButton(corner: CORNER) {
+        self.clipsToBounds = true
+        self.layer.cornerRadius = 12
         // cornerRadius 4 goc
             //self.clipsToBounds = true
             //self.layer.cornerRadius = 12
         
         // cornerRadius tuy chinh
-            // Top Left .layerMinXMinYCorner
-            // Top Right .layerMaxXMinYCorner
-            // Bottom Left .layerMinXMaxYCorner
-            // Bottom Right .layerMaxXMaxYCorner
-        
-        //
-
-        switch buttonName {
-        case "topLeftBottomLeft":
-            self.clipsToBounds = true
-            self.layer.cornerRadius = 12
-            self.layer.maskedCorners = [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+            // 1 Top Left .layerMinXMinYCorner
+            // 2 Top Right .layerMaxXMinYCorner
+            // 3 Bottom Left .layerMinXMaxYCorner
+            // 4 Bottom Right .layerMaxXMaxYCorner
+        switch corner {
+        case .topLeftbottomLeft:
+            self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMinXMinYCorner]
             break
-        case "topRightBottomRight" :
-            self.clipsToBounds = true
-            self.layer.cornerRadius = 12
+        case .topRightBottomRight:
             self.layer.maskedCorners = [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
             break
-        case "topLeft":
-            self.clipsToBounds = true
-            self.layer.cornerRadius = 12
-            self.layer.maskedCorners = [.layerMinXMinYCorner]
+        case .topLeft:
+            self.layer.maskedCorners = .layerMinXMinYCorner
             break
-        case "topRight" :
-            self.clipsToBounds = true
-            self.layer.cornerRadius = 12
+        case .topRight:
             self.layer.maskedCorners = .layerMaxXMinYCorner
             break
-        default:
-            self.clipsToBounds = true
-            self.layer.cornerRadius = 12
         }
     }
 }
+
 

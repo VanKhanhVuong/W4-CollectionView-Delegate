@@ -23,8 +23,8 @@ class MyTableViewCell: UITableViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.downButton.customButtonCornerRadius(buttonName: "topLeftBottomLeft")
-        self.upButton.customButtonCornerRadius(buttonName: "topRightBottomRight")
+        self.upButton.coradiusButton(corner: .topRightBottomRight)
+        self.downButton.coradiusButton(corner: .topLeftbottomLeft)
         self.cellLabelView.customCornerRadius()
     }
 
@@ -32,10 +32,18 @@ class MyTableViewCell: UITableViewCell {
         super.setSelected(selected, animated: animated)
     }
     @IBAction func touchUpButton(_ sender: Any) {
+        self.amountLabel.text = "\(Int(self.amountLabel.text!)! + 1)"
         delegate?.plusOrMinusButton(cell: self, calculation: true)
     }
     @IBAction func touchDownButton(_ sender: Any) {
-        delegate?.plusOrMinusButton(cell: self, calculation: false)
+        let amount: String = "\(Int(self.amountLabel.text!)! - 1)"
+        if ((Int(amount))! <= 0) {
+            delegate?.plusOrMinusButton(cell: self, calculation: false)
+        } else {
+            delegate?.plusOrMinusButton(cell: self, calculation: false)
+            self.amountLabel.text = amount
+        }
+        
     }
     
     

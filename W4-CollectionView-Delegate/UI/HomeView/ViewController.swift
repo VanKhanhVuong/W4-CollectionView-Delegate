@@ -7,14 +7,16 @@
 
 import UIKit
 protocol ViewControllerDelegate: AnyObject {
-    func getValueFruitArray(array: Array<Fruit>)
+    func pushValueFruitArray(array: [Fruit])
 }
 
 class ViewController: UIViewController {
+    @IBOutlet weak var cartButton: UIButton!
     @IBOutlet weak var fruitListCollectionView: UICollectionView!
-    var fruitArray: Array<Fruit> = Array()
+    var fruitArray: [Fruit] = []
+    var listDisplayArray: [Fruit] = []
+    var checkbackViewHome: Bool = false
     weak var delegate: ViewControllerDelegate?
-    var index = IndexPath(item: 0, section: 0)
     
     var data = [Fruit(image: "🥝", name: "Kiwi", description: "Mô tả của Kiwi", amount: 0, price: 20.0, isShow: true, backgrourd: UIColor(red: 157/255, green: 172/255, blue: 87/255, alpha: 1)),
                 Fruit(image: "🌶", name: "Ớt", description: "Mô tả của Ớt", amount: 0, price: 30.0, isShow: true, backgrourd: UIColor(red: 230/255, green: 70/255, blue: 63/255, alpha: 1)),
@@ -33,7 +35,6 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         registerCollectionView()
-        setupNavigationBarItems()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -41,25 +42,21 @@ class ViewController: UIViewController {
         reloadDataFruitList()
     }
     
+    
+    @IBAction func cardButton(_ sender: Any) {
+        handleFiler()
+    }
+    
     func reloadDataFruitList() {
-        if (!self.fruitArray.isEmpty) {
-            for i in 0..<data.count {
-                for j in 0..<fruitArray.count {
-                    if self.fruitArray[j].isShow == false {
-                        fruitArray[j].amount = 0
-                    }
-                    if (data[i].name == fruitArray[j].name) {
-                        if (data[i].amount != fruitArray[j].amount) {
-                            data[i].amount = fruitArray[j].amount
-                        }
-                    }
-                }
-            }
+        if self.checkbackViewHome == true {
+            self.listDisplayArray = self.fruitArray
             fruitListCollectionView.reloadData()
         }
     }
     
     func registerCollectionView(){
+        // Lấy data tổng lấy đổ vào listDisplayArray để hiển thị
+        self.listDisplayArray = self.data
         fruitListCollectionView.register(MyCollectionViewCell.nib, forCellWithReuseIdentifier: MyCollectionViewCell.identifier)
         fruitListCollectionView.delegate = self
         fruitListCollectionView.dataSource = self
@@ -68,14 +65,23 @@ class ViewController: UIViewController {
         fruitListCollectionView.collectionViewLayout = layout
     }
     
-    func setupNavigationBarItems() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "bag"), style: .plain, target: self, action: #selector(handleFiler))
+    func cartCount() {
+        // loc listDisplayArray[index].amount > 0  cho vào  listGioHang (Đếm list giỏ hang đẻ hiện label)
+        var listGioHang: [Fruit] = []
+        for i in 0..<self.listDisplayArray.count {
+            if self.listDisplayArray[i].amount > 0 {
+                listGioHang.append(self.listDisplayArray[i])
+            }
+        }
+        // Hien thi Label trên trong gio hang XXX
+        self.cartButton.setTitle("\(listGioHang.count)", for: .normal)
     }
     
-    @objc func handleFiler() {
+    func handleFiler() {
         let storyBoard = UIStoryboard(name: "Main", bundle: nil)
         let detailView = storyBoard.instantiateViewController(identifier: "DetailsView") as! DetailsViewController
-        detailView.fruitArr = self.fruitArray
+        detailView.data = self.listDisplayArray
+        delegate?.pushValueFruitArray(array: self.listDisplayArray)
         detailView.delegate = self
         self.navigationController?.pushViewController(detailView, animated: true)
     }
@@ -85,17 +91,18 @@ class ViewController: UIViewController {
 //MARK: - Extension
 extension ViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return data.count
+        return self.listDisplayArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let item = collectionView.dequeueReusableCell(withReuseIdentifier: MyCollectionViewCell.identifier, for: indexPath) as! MyCollectionViewCell
-        item.fruitNameLabel.text = data[indexPath.item].name
-        item.imageFruitLabel.text = data[indexPath.item].image
-        item.itemView.backgroundColor = data[indexPath.item].backgrourd
-        item.priceFruitLabel.text = "\(data[indexPath.item].price)"
-        item.fruitDescriptionLabel.text = data[indexPath.item].description
-        item.amountFruitLabel.text = "\(data[indexPath.item].amount)"
+        let model = self.listDisplayArray[indexPath.item]
+        item.fruitNameLabel.text = model.name
+        item.imageFruitLabel.text = model.image
+        item.itemView.backgroundColor = model.backgrourd
+        item.priceFruitLabel.text = "\(model.price)"
+        item.fruitDescriptionLabel.text = model.description
+        item.amountFruitLabel.text = "\(model.amount)"
         item.upButton.backgroundColor = UIColor(white: 1, alpha: 0.5)
         item.downButton.backgroundColor = UIColor(white: 1, alpha: 0.5)
         item.delegate = self
@@ -118,46 +125,36 @@ extension ViewController: UICollectionViewDelegateFlowLayout{
 }
 extension ViewController: MyCollectionViewCellDelegate {
     func plusOrMinusButton(item: MyCollectionViewCell, calculation: Bool) {
-        guard var amount = Int(item.amountFruitLabel.text!) else { return }
-        guard let image:String = item.imageFruitLabel.text else { return  }
-        guard let name:String = item.fruitNameLabel.text else { return  }
-        guard let description:String = item.fruitDescriptionLabel.text else { return  }
-        guard let price:Float = Float(item.priceFruitLabel.text!) else { return  }
-        guard let backgrourd:UIColor = item.itemView.backgroundColor else { return  }
-        
-        if (calculation == true) {
-            amount = amount + 1
-            item.downButton.isHidden = false
-        } else {
-            if amount == 0 {
-                amount = 0
-            } else {
-                amount = amount - 1
+        // Lấy index của item nhấn (+ -)
+        guard let indexPath: IndexPath = fruitListCollectionView.indexPath(for: item) else { return }
+        // Lấy thuộc tính model.amount
+        guard let amountModel: Int = Int(item.amountFruitLabel.text!) else { return }
+        // Khi thấy model.amount có thực hiện phép cộng hoặc trừ (calculation) ? true : false
+        // Thì if check Nếu listDisplayArray có model.amount tại index đó có thay đổi  {
+        //        Thì update model listdiplay
+        if calculation == true {
+            if self.listDisplayArray[indexPath.item].amount != amountModel {
+                self.listDisplayArray[indexPath.item].amount = amountModel
             }
-        }
-        item.amountFruitLabel.text = "\(amount)"
-        for i in 0..<fruitArray.count {
-            if fruitArray[i].image == item.imageFruitLabel.text{
-                if (fruitArray[i].amount < amount) {
-                    fruitArray[i].amount += 1
-                    return
-                } else if (fruitArray[i].amount) == amount {
-                    return
-                } else {
-                    fruitArray[i].amount -= 1
-                    return
+        } else {
+            if amountModel == 0 {
+                self.listDisplayArray[indexPath.item].amount = 0
+            } else {
+                if self.listDisplayArray[indexPath.item].amount != amountModel - 1{
+                    self.listDisplayArray[indexPath.item].amount = self.listDisplayArray[indexPath.item].amount - 1
                 }
             }
         }
-        fruitArray.append(Fruit(image: image, name: name, description: description, amount: amount, price: price, isShow: true, backgrourd: backgrourd))
+        cartCount()
     }
 }
 extension ViewController: DetailsViewControllerDelegate {
-    func getValueFruitArray(array: Array<Fruit>, index: IndexPath) {
-        self.fruitArray = []
-        self.index = IndexPath(item: 0, section: 0)
+    func getValueFruitArray(array: [Fruit], backViewHome: Bool, cartCount: Int) {
+        if cartCount != 0 {
+            self.cartButton.setTitle("\(cartCount)", for: .normal)
+        }
         self.fruitArray = array
-        self.index = index
+        self.checkbackViewHome = backViewHome
     }
 }
 

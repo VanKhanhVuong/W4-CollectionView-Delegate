@@ -18,7 +18,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Cn1-U7-5mV">
-                                <rect key="frame" x="0.0" y="138" width="414" height="724"/>
+                                <rect key="frame" x="0.0" y="88" width="414" height="774"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="cg9-8D-JMI">
                                     <size key="itemSize" width="128" height="128"/>
@@ -27,7 +27,7 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="VMa-wc-maq" customClass="MyCollectionViewCell" customModule="W4_CollectionView_Delegate" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="MyCollectionViewCell" id="VMa-wc-maq" customClass="MyCollectionViewCell" customModule="W4_CollectionView_Delegate" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="h7y-zk-aIa">
@@ -48,11 +48,25 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Cn1-U7-5mV" secondAttribute="trailing" id="Dvg-Lx-yZm"/>
                             <constraint firstItem="Cn1-U7-5mV" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="YRA-Yy-xbN"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="Cn1-U7-5mV" secondAttribute="bottom" id="uko-rO-h1f"/>
-                            <constraint firstItem="Cn1-U7-5mV" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="vXY-Gh-mgB"/>
+                            <constraint firstItem="Cn1-U7-5mV" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="vXY-Gh-mgB"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="OIf-9t-FsH"/>
+                    <navigationItem key="navigationItem" id="OIf-9t-FsH">
+                        <barButtonItem key="rightBarButtonItem" style="plain" id="lLE-cM-oNR">
+                            <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="lTj-mg-Po7">
+                                <rect key="frame" x="258" y="0.0" width="136" height="44"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" image="cart" catalog="system">
+                                    <color key="titleColor" systemColor="labelColor"/>
+                                </state>
+                                <connections>
+                                    <action selector="cardButton:" destination="BYZ-38-t0r" eventType="touchUpInside" id="YWD-xg-Pxe"/>
+                                </connections>
+                            </button>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
+                        <outlet property="cartButton" destination="lTj-mg-Po7" id="Wwd-OD-tuu"/>
                         <outlet property="fruitListCollectionView" destination="Cn1-U7-5mV" id="wyg-7g-xxj"/>
                     </connections>
                 </viewController>
@@ -157,6 +171,10 @@
         </scene>
     </scenes>
     <resources>
+        <image name="cart" catalog="system" width="128" height="102"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411764705882" green="0.23529411764705882" blue="0.2627450980392157" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>

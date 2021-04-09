@@ -26,8 +26,9 @@ class MyCollectionViewCell: UICollectionViewCell {
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        self.upButton.customButtonCornerRadius(buttonName: "topLeft")
-        self.downButton.customButtonCornerRadius(buttonName: "topRight")
+        self.downButton.isHidden = true
+        self.upButton.coradiusButton(corner: .topLeft)
+        self.downButton.coradiusButton(corner: .topRight)
         self.itemView.customCornerRadius()
     }
 
@@ -38,11 +39,25 @@ class MyCollectionViewCell: UICollectionViewCell {
     static var nib: UINib{
         return UINib(nibName: identifier, bundle: nil)
     }
+    
     @IBAction func touchUpButton(_ sender: Any) {
+        if self.downButton.isHidden == true {
+            self.downButton.isHidden = false
+        }
+        
+        self.amountFruitLabel.text = "\(Int(self.amountFruitLabel.text!)! + 1)"
         delegate?.plusOrMinusButton(item: self, calculation: true)
     }
     @IBAction func touchDownButton(_ sender: Any) {
-        delegate?.plusOrMinusButton(item: self, calculation: false)
+        let amount: String = "\(Int(self.amountFruitLabel.text!)! - 1)"
+        if ((Int(amount))! < 0) {
+            self.amountFruitLabel.text = "0"
+            self.downButton.isHidden = true
+        } else {
+            delegate?.plusOrMinusButton(item: self, calculation: false)
+            self.amountFruitLabel.text = amount
+        }
+
     }
     
     
